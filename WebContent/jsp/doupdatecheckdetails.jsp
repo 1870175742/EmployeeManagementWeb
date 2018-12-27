@@ -1,13 +1,13 @@
-<%@page import="com.wwwxy.employeemanagement.dao.EmployeeDao"%>
-<%@page import="com.wwwxy.employeemanagement.entity.EmployeeEntity"%>
+<%@page import="com.wwwxy.employeemanagement.dao.CheckDetailsDao"%>
+<%@page import="com.wwwxy.employeemanagement.entity.CheckDetails"%>
+<%@page import="java.util.List"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>修改员工信息</title>
-</head>
+<title>修改考勤记录</title>
 <style type="text/css">
 	form{
 		margin:0px;
@@ -25,25 +25,14 @@
 	#submit:hover{
 		cursor:pointer;
 	}
-	
-	
 	input{
                 border: 1px solid #ccc; 
                 padding: 7px 0px;
                 border-radius: 3px; /*css3属性IE不支持*/
                 padding-left:5px; 
             }
-            
-       .disabled{
-       			/* margin-right:-50px; */
-       }     
-     .bkxg{
-     	
+     span{
      	font-size:12px;
-     	
-     }
-     #disabled{
-     	font-size:20px;
      }
      select{
      	border: 1px solid #ccc; 
@@ -51,94 +40,79 @@
                 border-radius: 3px; /*css3属性IE不支持*/
                 padding-left:5px; 
      }
-     form .empid{
-     	margin-left:55px;
+     #status{
+     	margin-right:55px;
      }
-     form .empage{
-     	margin-left:125px;
-     }
-     
 </style>
+
+</head>
 <body onload="getTime()">
-<%! 
+	<%! 
+		int cid;
 		int empid;
-		String empname;
-		String empsex;
-		int empage;
-		String empbirthday;
-		float empbasic;
-		String empemail;
-		String empaddress;
+		String checkin;
+		String checkout;
+		String cstatus;
+		String cdate;
 	%>
 	<%
-		
+		CheckDetails cd = new CheckDetails();
 		int id = Integer.parseInt(request.getParameter("id"));
-		EmployeeDao ed = new EmployeeDao();
-		EmployeeEntity ee  = ed.getEmployeeById(id);
+		CheckDetailsDao cdd = new CheckDetailsDao();
+		List<CheckDetails> list = cdd.getCheckDetails(id);
+		for(CheckDetails lists:list){
+			cid = lists.getCid();
+			empid = lists.getEmpid();
+			checkin = lists.getCcheckin();
+			checkout = lists.getCcheckout();
+			cstatus = lists.getCstatus();
+			cdate = lists.getCdate();
+		}
 		
-			empid = ee.getEmpId();
-			empname = ee.getEmpName();
-			empsex = ee.getEmpSex();
-			empage =ee.getEmpAge();
-			empbirthday =ee.getEmpBirthday();
-			empbasic = ee.getEmpBasic();
-			empemail = ee.getEmpEmail();
-			empaddress = ee.getEmpAddress();
-
-			String year;
-			String month;
-			String day;
-			String[] strs = empbirthday.split("-");
-			year =strs[0];
-			month = strs[1];
-			day = strs[2];
-			
-			boolean flag;
-			if("男".equals(empsex)){
-				flag = true;
-			}else{
-				flag=false;
-			}
-
+		String year;
+		String month;
+		String day;
+		
+		String[] strs = cdate.split("-");
+		year =strs[0];
+		month = strs[1];
+		day = strs[2];
 	%>
-<center>
-	<h1>欢迎来到工资记录修改</h1>
-		<form name="myform" onsubmit="return checkAll()">
-			<div class="empid"><label for="inputs"><span id="disabled">员工编号:</span></label><input class="disabled" type="text" disabled="disabled" value="<%=empid%>"><span class="bkxg">*不可修改</span><br><br></div>
-			<label for="inputs">员工姓名:</label><input  type="text"  value="<%=empname%>"><br><br>
-			<label for="inputs">员工性别:</label>
+	
+	
+	<center>
+	<h1>欢迎来到考勤记录修改</h1>
+		<form name="myform" action="successupdatecheckdetails.jsp?id=<%=id%>" method="post">
+			<label for="inputs">考勤编号:</label><input name="cid" class="disabled" type="text" readonly value="<%=cid%>"><span>*不可修改</span><br><br>
+			<label for="inputs">员工编号:</label><input name="empid" class="disabled" type="text" readonly value="<%=empid%>"><span>*不可修改</span><br><br>
+			<label for="inputs">上班打卡:</label><input name="checkin" class="disabled" type="text" readonly value="<%=checkin%>"><span>*不可修改</span><br><br>
+			<label for="inputs">下班打卡:</label><input name="checkout" class="disabled" type="text" readonly value="<%=checkout%>"><span>*不可修改</span><br><br>
+			<div id="status"><label for="inputs">考勤状态:</label>
+			<select name="status" >
+        		<option value="正常" <%if("正常".equals(cstatus)){%>selected ="selected"<% }%>>正常</option>
+        		<option value="迟到" <%if("迟到".equals(cstatus)){%>selected ="selected"<% }%>>迟到</option>
+        		<option value="早退" <%if("早退".equals(cstatus)){%>selected ="selected"<% }%>>早退</option>
+        		<option value="加班" <%if("加班".equals(cstatus)){%>selected ="selected"<% }%>>加班</option>
+        		<option value="旷工" <%if("旷工".equals(cstatus)){%>selected ="selected"<% }%>>旷工</option>
+        		<option value="迟到,加班" <%if("迟到,加班".equals(cstatus)){%>selected ="selected"<% }%>>迟到,加班</option>
+        		<option value="迟到,早退" <%if("迟到,早退".equals(cstatus)){%>selected ="selected"<% }%>>迟到,早退</option>
+    		</select>
+			</div><br>
 			
-			<input name="sex" type="radio" value="男" <%if(flag){%>checked<% } %>/>男
-			<input name="sex" type="radio" value="女" <%if(!flag){%>checked<% } %>/>女
 			
-
-
-			<br><br>
-			<div class="empage"><label for="inputs">员工年龄:</label><input id="empage" type="text" disabled value="<%=empage%>"><span class="bkxg">*请通过修改生日修改年龄</span><br><br></div>
-			<label for="inputs">员工生日:</label>
-			<select name="year" id="year" onchange="getday()" >
+			
+			<label for="inputs">考勤时间:</label>
+			<select name="year" disabled="disabled" onchange="getday()" >
         		<option value="1990">1990</option>
     		</select>年
-    		<select name="month"  onchange="getday()" >
+    		<select name="month" disabled="disabled" onchange="getday()" >
        			<option value="1">1</option>
 		    </select>月
-		    <select name="day">
+		    <select disabled="disabled" name="day">
 		        <option>1</option>
 		    </select>日
-			
-			
+			<span>*不可修改</span>
 			<br><br>
-			<label for="inputs">员工工资:</label><input  type="text"  value="<%=empbasic%>"><br><br>
-			<div id="big">
-			<label for="inputs">员工邮箱:</label><input  type="text" onblur="isEmail(this.value)" id="emailinput"  value="<%=empemail%>">
-			<span id ="email"></span>
-			</div>
-			<br>
-			<label for="inputs">员工地址:</label><input  type="text"  value="<%=empaddress%>"><br><br>
-			
-			
-			
-			<br>
 			<input type="submit" id="submit" value="修改">
 			
 		</form>
@@ -236,62 +210,6 @@
 		        }
 		    }
 		    document.myform.day.innerHTML = day;
-		    yearchage();
 		}
-</script>
-<script type="text/javascript">
-function isEmail(strEmail) {
-    var flag = strEmail.search(/^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z0-9]+$/);
-    var email = document.getElementById("email");
-	var big = document.getElementById("big");
-    if (flag == -1){
-    	email.innerHTML =("*邮箱不正确");
-    	email.style.cssText="color:red;font-size:12px;display:inline-block;";
-    	big.style.cssText="margin-left:70px;";
-    	return false;
-    }else{
-    	email.style.cssText="display:none;";
-    	big.style.cssText="";
-    }
-    return true;
-}
-function checkAll(){
-	var emailinput = document.getElementById("emailinput").value;
-    if(!isEmail(emailinput)){
-        return false;
-    }else{
-        return true;
-    }
-
-}
-</script>
-<script type="text/javascript">
-/*根据出生日期算出年龄*/
-function yearchage(){
-	var birthYear = document.getElementById("year").value;
-	var returnAge = jsGetAge(birthYear);
-	var empage = document.getElementById("empage");
-	empage.value = returnAge;
-}
-
-
-function jsGetAge(birthYear){       
-    var returnAge;
-
-    d = new Date();
-    var nowYear = d.getFullYear();
-    
-    if(nowYear == birthYear){
-        returnAge = 0;//同年 则为0岁
-    }
-    else{
-        var ageDiff = nowYear - birthYear ; //年之差
-		returnAge = ageDiff
-    }
-    return returnAge;//返回周岁年龄
-    
-}
-
-</script>
-</body>
+</script></body>
 </html>

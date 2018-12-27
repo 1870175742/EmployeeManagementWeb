@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import com.wwwxy.employeemanagement.entity.EmployeeEntity;
 import com.wwwxy.employeemanagement.entity.LoginEntity;
@@ -117,6 +118,36 @@ public class EmployeeDao extends JDBCUtil{
 			}
 		}
 	}
+	public int UpdateEmployeeone(EmployeeEntity ee){
+		int row =0;
+		Connection con = getConnection();
+		PreparedStatement ps = null;
+		String sql = "update employee set empname=?,empsex=?,empage=?,empbirthday=?,empbasic=?,empemail=?,empaddress=? where empid=?";
+		try {
+			ps = con.prepareStatement(sql);
+			ps.setString(1, ee.getEmpName());
+			ps.setString(2, ee.getEmpSex());
+			ps.setInt(3, ee.getEmpAge());
+			ps.setString(4, ee.getEmpBirthday());
+			ps.setFloat(5, ee.getEmpBasic());
+			ps.setString(6, ee.getEmpEmail());
+			ps.setString(7, ee.getEmpAddress());
+			ps.setInt(8, ee.getEmpId());
+			row = ps.executeUpdate();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			try {
+				ps.close();
+				con.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return row;
+	}
 	
 	//根据工号查询员工
 	public EmployeeEntity getEmployeeById(int EmpId){
@@ -155,9 +186,10 @@ public class EmployeeDao extends JDBCUtil{
 		return ee;
 	}
 	//增加员工
-	public void AddEmployee(EmployeeEntity ee){
+	public int AddEmployee(EmployeeEntity ee){
 		Connection con = getConnection();
 		PreparedStatement ps = null;
+		int row=0;
 		String sql = "insert into employee (empname,empsex,empage,empbirthday,empbasic,empemail,empaddress) values(?,?,?,?,?,?,?)";
 		try {
 			ps= con.prepareStatement(sql);
@@ -168,7 +200,7 @@ public class EmployeeDao extends JDBCUtil{
 			ps.setFloat(5, ee.getEmpBasic());
 			ps.setString(6, ee.getEmpEmail());
 			ps.setString(7, ee.getEmpAddress());
-			ps.executeUpdate();
+			row = ps.executeUpdate();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -186,6 +218,7 @@ public class EmployeeDao extends JDBCUtil{
 			LoginEntity le = new LoginEntity(0, username, null, null, GetMaxId(), 0);
 			new LoginDao().addLogin(le);
 		}
+		return row;
 	}
 	
 	//查询员工最大id
@@ -245,4 +278,32 @@ public class EmployeeDao extends JDBCUtil{
 		int id = le.getId();
 		new LoginDao().delLoginById3(id);
 	}
+	public int DeleteEmployeeone(int EmpId){
+		int row=0;
+		Connection con = getConnection();
+		PreparedStatement ps = null;
+		String sql = "delete from employee where empid=?";
+		new EventDao().DropEventEntityByempid(EmpId);
+		try {
+			ps = con.prepareStatement(sql);
+			ps.setInt(1, EmpId);
+			row=ps.executeUpdate();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			try {
+				ps.close();
+				con.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		LoginEntity le = new LoginDao().getLoginById4(EmpId);
+		int id = le.getId();
+		new LoginDao().delLoginById3(id);
+		return row;
+	}
+
 }
